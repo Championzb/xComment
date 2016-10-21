@@ -9,12 +9,6 @@ git clone https://github.comcast.com/Bzhang001c/xComment.git
 
 cd xComment
 
-npm install express --save
-
-npm install --save async
-
-npm install --save request
-
 npm install
 
 npm start
