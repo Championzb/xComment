@@ -52,7 +52,7 @@ function openSocket() {
 				var duration = getRandomInt(6000, 12000);
 				if(msgJson && typeof msgJson === "object") {
 					var commentMsg = msgJson.text;
-					var stime = msgJson.stime + 2000;
+					var stime = msgJson.stime + 500;
 					if (commentMsg !== "undefined") {
 						var comment = {
 							"mode": 1,
