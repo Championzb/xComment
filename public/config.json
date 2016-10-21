@@ -1,0 +1,12 @@
+{
+	"services" : {
+		"commentSocket" : {
+			"host" : "96.118.56.113",
+			"port" : 8080
+		},
+		"historyService" : {
+			"host" : "96.118.56.113",
+			"port" : 8080
+		}
+	}
+}
