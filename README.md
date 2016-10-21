@@ -11,6 +11,10 @@ cd xComment
 
 npm install express --save
 
+npm install --save async
+
+npm install --save request
+
 npm install
 
 npm start

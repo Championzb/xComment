@@ -14,26 +14,56 @@ window.addEventListener("load",function(){
 	thevideojs.ABP();
 	// thevideojs.danmu.load("jsons/comment.xml");
 	insertHistoryComment();
-	openSocket();
+	$.getJSON("config.json", function(config){
+		var socketUrl = "ws://" + config.services.commentSocket.host + ":" + config.services.commentSocket.port + "/chat/2";
+		openSocket(socketUrl);
+	});	
 });
 
-function openSocket() {
-	var socket = new WebSocket('ws://10.21.163.17:8080/chat/2');
+function openSocket(socketUrl) {
+	//'ws://10.21.163.17:8080/chat/2'
+	var socket = new WebSocket(socketUrl);
 	
 	socket.onopen = function() {
-		// $('#btnMsgSend').click(function(e){
-		$('#commentForm').submit(function(e){
-			e.preventDefault();
-			var videoTime = Math.round(parseFloat(thevideojs.danmu.getVideoCurrentTime()*1000));
-			var commentMsg = {
-				"text" : $('#commentMsg').val(),
-				"stime" : videoTime
-			};
-			var msg = JSON.stringify(commentMsg);
-			console.log("Send Socket Message: " + msg);
-			socket.send(msg);
+		$('#btnMsgSend').click(function(e){
+		// $('#commentForm').submit(function(e){
+			// e.preventDefault();
+			if ($('#commentMsg').val().trim().length != 0) {
+				var videoTime = Math.round(parseFloat(thevideojs.danmu.getVideoCurrentTime()*1000));
+				var commentMsg = {
+					"text" : $('#commentMsg').val(),
+					"stime" : videoTime
+				};
+				var msg = JSON.stringify(commentMsg);
+				console.log("Send Socket Message: " + msg);
+				socket.send(msg);
+			}
 			$('#commentMsg').val('');
 		});
+		$('#commentMsg').keyup(function(e) {
+			if (e.keyCode == 13) {
+				if (e.shiftKey !== true) {
+					if ($('#commentMsg').val().trim().length != 0) {
+						var videoTime = Math.round(parseFloat(thevideojs.danmu.getVideoCurrentTime()*1000));
+						var commentMsg = {
+							"text" : $('#commentMsg').val(),
+							"stime" : videoTime
+						};
+						var msg = JSON.stringify(commentMsg);
+						console.log("Send Socket Message: " + msg);
+						socket.send(msg);
+					}
+					$('#commentMsg').val('');
+				}
+				return false;
+			}
+		});
+		// $('#commentMsg').on('blur', function(){
+		// 	var blurEl = $(this);
+		// 	setTimeout(function(){
+		// 		blurEl.focus();
+		// 	}, 100);
+		// });
 	};
 
 	socket.onerror = function(error) { console.log('WebSocket Error ', error) };
@@ -79,60 +109,34 @@ function getRandomInt(min, max) {
 };
 
 function insertHistoryComment() {
-    // $.ajax(
-    // 	{
-    // 		type: "GET",
-    // 		dataType: "jsonp",
-    // 		url: "http://10.21.163.17:8080/messages/2",
-    // 		success: function(result) {
-    //     		console.log(result);
-    // 		}
-    // 	}
-    // );
+    $.ajax(
+    	{
+    		type: "GET",
+    		dataType: "json",
+    		url: "/getCommentHistory?programId=2",
+    		success: function(result) {
+        		// console.log(result);
+        		result.forEach(insertComment);
+    		}
+    	}
+    );
 
-	var xhr = createCORSRequest('GET', 'http://10.21.163.17:8080/messages/2');
-	if (!xhr) {
-		throw new Error('CORS not supported');
-	}
+	// var xhr = createCORSRequest('GET', 'http://10.21.163.17:8080/messages/2');
+	// if (!xhr) {
+	// 	throw new Error('CORS not supported');
+	// }
 
-	xhr.onload = function() {
-		var responseText = xhr.responseText;
-		//console.log(responseText);
-		loadComment(responseText);
-	};
-
-	xhr.onerror = function() {
-		console.log('There was an error!');
-	};
-
-	xhr.send();
-
-	// socket.onmessage = function() {
-	// 	try {
-	// 		var msgJson = JSON.parse(event.data);
-	// 		var mode = commentModes[getRandomInt(0, commentModes.length)];
-	// 		var size = commentSizes[getRandomInt(0, commentSizes.length)];
-	// 		var color = commentColors[getRandomInt(0, commentColors.length)];
-	// 		var duration = getRandomInt(6000, 12000);
-	// 		if(msgJson && typeof msgJson === "object") {
-	// 			var commentMsg = msgJson.text;
-	// 			var stime = msgJson.stime;
-	// 			if (commentMsg !== "undefined") {
-	// 				var comment = {
-	// 					"mode": 1,
-	// 					"text": commentMsg,
-	// 					"stime": stime,
-	// 					"size": size,
-	// 					"color": color,
-	// 					"dur": duration
-	// 				};
-	// 				console.log("Insert History comment: " + JSON.stringify(comment));
-	// 				thevideojs.danmu.cmManager.insert(comment);
-	// 			}
-	// 		}
-	// 	}
-	// 	catch (e) {	}
+	// xhr.onload = function() {
+	// 	var responseText = xhr.responseText;
+	// 	//console.log(responseText);
+	// 	loadComment(responseText);
 	// };
+
+	// xhr.onerror = function() {
+	// 	console.log('There was an error!');
+	// };
+
+	// xhr.send();
 };
 
 function createCORSRequest(method, url) {
