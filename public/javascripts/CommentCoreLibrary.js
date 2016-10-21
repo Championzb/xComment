@@ -807,7 +807,6 @@ var CommentManager = (function() {
 	};
 	CommentManager.prototype.time = function(time){
 		time = time - 1;
-        console.log(this.position)
 		if(this.position >= this.timeline.length || Math.abs(this._lastPosition - time) >= 2000){
 			this.seek(time);
 			this._lastPosition = time;
